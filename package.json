@@ -1,15 +1,15 @@
 {
-  "name": "@mycel/verify",
+  "name": "@organichub/verify",
   "version": "0.1.0",
   "description": "Replay-proof Solana wallet ownership proofs and two-provider token hold checks, as run by MYCEL Sentinel.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/FCisco95/mycel-verify.git"
+    "url": "git+https://github.com/FCisco95/organic-verify.git"
   },
-  "homepage": "https://github.com/FCisco95/mycel-verify#readme",
+  "homepage": "https://github.com/FCisco95/organic-verify#readme",
   "bugs": {
-    "url": "https://github.com/FCisco95/mycel-verify/issues"
+    "url": "https://github.com/FCisco95/organic-verify/issues"
   },
   "keywords": [
     "solana",

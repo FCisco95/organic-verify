@@ -1,4 +1,4 @@
-# @mycel/verify
+# @organichub/verify
 
 Replay-proof Solana wallet ownership proofs and two-provider token hold checks,
 as run by MYCEL Sentinel.
@@ -20,7 +20,7 @@ Two problems this solves, both of which are easy to get subtly wrong:
 
 ```bash
 # Run only after the release checks in "Version and provenance" pass.
-npm install @mycel/verify
+npm install @organichub/verify
 ```
 
 Node 22 or newer. ESM only. The public types use Node's `Buffer`, so a
@@ -40,7 +40,7 @@ single-use 32-byte nonce, and a five-minute window. Reusing a proof fails, and
 so does presenting one issued for a different site.
 
 ```ts
-import { createVerificationRequest, consumeWalletProof, type TenantProofConfig } from "@mycel/verify";
+import { createVerificationRequest, consumeWalletProof, type TenantProofConfig } from "@organichub/verify";
 
 const proofConfig: TenantProofConfig = {
   origin: "https://app.example.com",   // https, no path, query, fragment or credentials
@@ -163,7 +163,7 @@ two-provider result is the consumer contract; do not substitute the lower-level
 ## Token hold check
 
 ```ts
-import { checkHold, HeliusBalanceReader, FallbackBalanceReader } from "@mycel/verify";
+import { checkHold, HeliusBalanceReader, FallbackBalanceReader } from "@organichub/verify";
 
 const result = await checkHold({
   projectId, owner: walletAddress, mint, thresholdRaw: 1_000_000n,
@@ -244,7 +244,7 @@ A production consumer must prove its own boundary. At minimum, test:
 
 ## Version and provenance
 
-Pin an exact registry version (`"@mycel/verify": "0.1.0"`) and commit the
+Pin an exact registry version (`"@organichub/verify": "0.1.0"`) and commit the
 consumer lockfile. Do not adopt from a range, dist-tag, workspace link, Git URL,
 local tarball or unpublished branch.
 
@@ -260,7 +260,7 @@ manifest version and reviewed source agree. Install that exact registry version
 in a clean consumer outside this monorepo on supported Node versions and check
 that its runtime/types resolve with no `workspace:*` or private-scope runtime
 dependency. The release tag must resolve to the reviewed commit, and the provenance
-statement must name `FCisco95/mycel-verify`.
+statement must name `FCisco95/organic-verify`.
 
 Until all of those checks and the consumer acceptance suite pass, the package
 and Hyphae adoption remain unverified.
