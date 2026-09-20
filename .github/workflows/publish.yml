@@ -49,11 +49,24 @@ jobs:
       - name: Check the tarball carries exactly the intended files
         run: |
           npm pack --dry-run --ignore-scripts --json > pack.json
-          node -e "const [p]=require('./pack.json'); const files=p.files.map(f=>f.path).sort();
-            const want=['LICENSE','README.md','dist/index.d.ts','dist/index.js','package.json'];
-            if (JSON.stringify(files)!==JSON.stringify(want)) { console.error('unexpected tarball contents', files); process.exit(1) }
-            for (const f of ['dist/index.js','dist/index.d.ts']) { const t=require('fs').readFileSync(f,'utf8');
-              if (t.includes('workspace:') || /from\s+["']@/.test(t)) { console.error('unexpected scoped or workspace import in ' + f); process.exit(1) } }"
+          node - <<'JS'
+          const fs = require("fs");
+          const [pack] = JSON.parse(fs.readFileSync("pack.json", "utf8"));
+          const files = pack.files.map(f => f.path).sort();
+          const want = ["LICENSE", "README.md", "dist/index.d.ts", "dist/index.js", "package.json"];
+          if (JSON.stringify(files) !== JSON.stringify(want)) {
+            console.error("unexpected tarball contents", files);
+            process.exit(1);
+          }
+          for (const f of ["dist/index.js", "dist/index.d.ts"]) {
+            const text = fs.readFileSync(f, "utf8");
+            if (text.includes("workspace:") || /from\s+["']@/.test(text)) {
+              console.error("unexpected scoped or workspace import in " + f);
+              process.exit(1);
+            }
+          }
+          console.log("tarball ok:", files.join(", "));
+          JS
           rm pack.json
 
       - name: Publish
