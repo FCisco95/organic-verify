@@ -1,0 +1,58 @@
+{
+  "name": "@mycel/verify",
+  "version": "0.1.0",
+  "description": "Replay-proof Solana wallet ownership proofs and two-provider token hold checks, as run by MYCEL Sentinel.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FCisco95/mycel-verify.git"
+  },
+  "homepage": "https://github.com/FCisco95/mycel-verify#readme",
+  "bugs": {
+    "url": "https://github.com/FCisco95/mycel-verify/issues"
+  },
+  "keywords": [
+    "solana",
+    "wallet",
+    "signmessage",
+    "ed25519",
+    "token-gating",
+    "telegram"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "verify": "npm run build && npm run typecheck && npm test"
+  },
+  "dependencies": {
+    "bs58": "6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "tsup": "8.5.0",
+    "typescript": "6.0.3"
+  }
+}

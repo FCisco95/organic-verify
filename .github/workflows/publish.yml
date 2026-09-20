@@ -1,0 +1,68 @@
+name: Publish
+
+# Tag-only. Nothing here runs on a push or a pull request, so publishing is
+# always a deliberate act: `git tag v0.1.0 && git push origin v0.1.0`. The tag
+# must match the manifest version or the job stops before publishing.
+#
+# Authentication, in order of preference:
+#   1. npm trusted publishing (OIDC): configure this repository and this
+#      workflow filename as the package's trusted publisher on npmjs.com.
+#      Provenance is then generated automatically.
+#   2. A granular automation token stored as the NPM_TOKEN repository secret.
+#      Provenance is requested explicitly.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  id-token: write # OIDC identity for trusted publishing and provenance
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: "24"
+
+      - name: Require an npm CLI that supports trusted publishing
+        run: |
+          node -e "const [a,b,c]=require('child_process').execSync('npm --version').toString().trim().split('.').map(Number);
+            if (a < 11 || (a === 11 && (b < 5 || (b === 5 && c < 1)))) { console.error('npm >= 11.5.1 required'); process.exit(1) }"
+
+      - name: Check the tag matches the package version
+        run: |
+          tagged="${GITHUB_REF_NAME#v}"
+          declared="$(node -p "require('./package.json').version")"
+          if [ "$tagged" != "$declared" ]; then
+            echo "tag $GITHUB_REF_NAME does not match package version $declared" >&2
+            exit 1
+          fi
+
+      - run: npm ci --ignore-scripts
+      - run: npm run verify
+
+      - name: Check the tarball carries exactly the intended files
+        run: |
+          npm pack --dry-run --ignore-scripts --json > pack.json
+          node -e "const [p]=require('./pack.json'); const files=p.files.map(f=>f.path).sort();
+            const want=['LICENSE','README.md','dist/index.d.ts','dist/index.js','package.json'];
+            if (JSON.stringify(files)!==JSON.stringify(want)) { console.error('unexpected tarball contents', files); process.exit(1) }
+            for (const f of ['dist/index.js','dist/index.d.ts']) { const t=require('fs').readFileSync(f,'utf8');
+              if (t.includes('workspace:') || /from\s+["']@/.test(t)) { console.error('unexpected scoped or workspace import in ' + f); process.exit(1) } }"
+          rm pack.json
+
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -n "$NODE_AUTH_TOKEN" ]; then
+            echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" > "$HOME/.npmrc"
+            npm publish --provenance --access public
+          else
+            npm publish --access public
+          fi
